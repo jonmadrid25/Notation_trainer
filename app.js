@@ -15,6 +15,10 @@ const lowSelect = document.querySelector("#low-note");
 const highSelect = document.querySelector("#high-note");
 const bassPresetTenorToggle = document.querySelector("#bass-instruments-tenor-clef");
 const reviewList = document.querySelector("#review-list");
+const settingsToggle = document.querySelector("#settings-toggle");
+const settingsClose = document.querySelector("#settings-close");
+const settingsPanel = document.querySelector("#settings-panel");
+const settingsBackdrop = document.querySelector("#settings-backdrop");
 const modeButtons = document.querySelectorAll("[data-mode]");
 const clefButtons = document.querySelectorAll("[data-clef]");
 
@@ -664,6 +668,13 @@ function setClef(clef) {
   });
 }
 
+function setSettingsOpen(open) {
+  document.body.classList.toggle("settings-open", open);
+  settingsToggle.setAttribute("aria-expanded", String(open));
+  settingsPanel.setAttribute("aria-hidden", String(!open));
+  settingsBackdrop.hidden = !open;
+}
+
 answers.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-answer]");
   if (button) checkAnswer(button.dataset.answer);
@@ -674,6 +685,9 @@ document.querySelector("#show-answer").addEventListener("click", () => {
   if (!state.answered) checkAnswer("");
 });
 document.querySelector("#hear-note").addEventListener("click", playCurrentNote);
+settingsToggle.addEventListener("click", () => setSettingsOpen(true));
+settingsClose.addEventListener("click", () => setSettingsOpen(false));
+settingsBackdrop.addEventListener("click", () => setSettingsOpen(false));
 document.querySelector("#reset-session").addEventListener("click", () => {
   state.score = 0;
   state.streak = 0;
@@ -754,6 +768,9 @@ document.addEventListener("keydown", (event) => {
   }
   if (event.key === "Enter") {
     chooseNext();
+  }
+  if (event.key === "Escape") {
+    setSettingsOpen(false);
   }
 });
 
