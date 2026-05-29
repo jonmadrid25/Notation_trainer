@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Notation Trainer</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="practice-pane" aria-label="Note practice">
+        <header class="topbar">
+          <div>
+            <h1>Notation Trainer</h1>
+            <p class="eyebrow">Music note review</p>
+          </div>
+          <div class="score-strip" aria-label="Session stats">
+            <div>
+              <span id="score">0</span>
+              <small>score</small>
+            </div>
+            <div>
+              <span id="streak">0</span>
+              <small>streak</small>
+            </div>
+            <div>
+              <span id="accuracy">0%</span>
+              <small>accuracy</small>
+            </div>
+          </div>
+        </header>
+
+        <div class="staff-wrap">
+          <svg id="staff" viewBox="0 0 720 310" role="img" aria-labelledby="staff-title staff-desc">
+            <title id="staff-title">Music staff</title>
+            <desc id="staff-desc">A note appears on the selected clef staff. Choose its name.</desc>
+          </svg>
+        </div>
+
+        <div class="prompt-row" aria-live="polite">
+          <p id="prompt">Name this note.</p>
+          <button id="hear-note" class="icon-button" type="button" aria-label="Hear note" title="Hear note">
+            <span aria-hidden="true">♪</span>
+          </button>
+        </div>
+
+        <div id="answers" class="answer-grid" aria-label="Answer choices"></div>
+
+        <div class="action-row">
+          <button id="show-answer" type="button" class="secondary">Show answer</button>
+          <button id="next-note" type="button">Next note</button>
+        </div>
+      </section>
+
+      <aside class="review-pane" aria-label="Practice settings and review">
+        <section class="control-section">
+          <h2>Clef</h2>
+          <div class="segmented clef-segmented" role="group" aria-label="Clef">
+            <button type="button" class="active" data-clef="treble">Treble</button>
+            <button type="button" data-clef="alto">Alto</button>
+            <button type="button" data-clef="tenor">Tenor</button>
+            <button type="button" data-clef="bass">Bass</button>
+          </div>
+          <label class="toggle">
+            <input id="bass-instruments-tenor-clef" type="checkbox">
+            <span>Use tenor clef for bass-clef presets</span>
+          </label>
+        </section>
+
+        <section class="control-section level-section">
+          <h2>Level Challenge</h2>
+          <div class="level-status" aria-live="polite">
+            <strong id="level-title">Level 1</strong>
+            <span id="level-description">Warmup</span>
+          </div>
+          <div class="level-meter" aria-label="Level progress">
+            <span id="level-progress-bar"></span>
+          </div>
+          <p id="level-progress-text" class="level-progress-text">0/8 correct</p>
+          <div id="level-buttons" class="level-buttons" role="group" aria-label="Choose level"></div>
+        </section>
+
+        <section class="control-section">
+          <h2>Instrument Range</h2>
+          <div id="instrument-presets" class="preset-grid" role="group" aria-label="Instrument range presets"></div>
+        </section>
+
+        <section class="control-section">
+          <h2>Practice Range</h2>
+          <label for="low-note">Lowest note</label>
+          <select id="low-note"></select>
+          <label for="high-note">Highest note</label>
+          <select id="high-note"></select>
+        </section>
+
+        <section class="control-section">
+          <h2>Mode</h2>
+          <div class="segmented" role="group" aria-label="Practice mode">
+            <button type="button" class="active" data-mode="all">All notes</button>
+            <button type="button" data-mode="missed">Missed</button>
+          </div>
+        </section>
+
+        <section class="control-section progress-section">
+          <h2>Review</h2>
+          <div id="review-list" class="review-list" aria-live="polite"></div>
+          <button id="reset-session" type="button" class="secondary full">Reset session</button>
+        </section>
+      </aside>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
