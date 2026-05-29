@@ -30,25 +30,29 @@
           </div>
         </header>
 
-        <div class="staff-wrap">
-          <svg id="staff" viewBox="0 0 720 310" role="img" aria-labelledby="staff-title staff-desc">
-            <title id="staff-title">Music staff</title>
-            <desc id="staff-desc">A note appears on the selected clef staff. Choose its name.</desc>
-          </svg>
-        </div>
+        <div class="practice-grid">
+          <div class="staff-wrap">
+            <svg id="staff" viewBox="0 0 720 310" role="img" aria-labelledby="staff-title staff-desc">
+              <title id="staff-title">Music staff</title>
+              <desc id="staff-desc">A note appears on the selected clef staff. Choose its name.</desc>
+            </svg>
+          </div>
 
-        <div class="prompt-row" aria-live="polite">
-          <p id="prompt">Name this note.</p>
-          <button id="hear-note" class="icon-button" type="button" aria-label="Hear note" title="Hear note">
-            <span aria-hidden="true">♪</span>
-          </button>
-        </div>
+          <div class="answer-panel">
+            <div class="prompt-row" aria-live="polite">
+              <p id="prompt">Name this note.</p>
+              <button id="hear-note" class="icon-button" type="button" aria-label="Hear note" title="Hear note">
+                <span aria-hidden="true">♪</span>
+              </button>
+            </div>
 
-        <div id="answers" class="answer-grid" aria-label="Answer choices"></div>
+            <div id="answers" class="answer-grid" aria-label="Answer choices"></div>
 
-        <div class="action-row">
-          <button id="show-answer" type="button" class="secondary">Show answer</button>
-          <button id="next-note" type="button">Next note</button>
+            <div class="action-row">
+              <button id="show-answer" type="button" class="secondary">Show answer</button>
+              <button id="next-note" type="button">Next note</button>
+            </div>
+          </div>
         </div>
       </section>
 
