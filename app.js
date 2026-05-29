@@ -77,26 +77,15 @@ const instrumentRanges = [
 
 const instrumentFamilyOrder = ["Custom", "Brass", "Woodwind", "Strings", "Percussion"];
 
-const levels = [
-  { name: "Level 1", description: "Treble steps", low: "C4", high: "G4", clefs: ["treble"], accidentals: [""], target: 8 },
-  { name: "Level 2", description: "Treble octave", low: "C4", high: "C5", clefs: ["treble"], accidentals: [""], target: 8 },
-  { name: "Level 3", description: "Treble stretch", low: "G3", high: "C5", clefs: ["treble"], accidentals: [""], target: 10 },
-  { name: "Level 4", description: "Bass basics", low: "C2", high: "C3", clefs: ["bass"], accidentals: [""], target: 8 },
-  { name: "Level 5", description: "Bass octave", low: "C2", high: "C4", clefs: ["bass"], accidentals: [""], target: 10 },
-  { name: "Level 6", description: "Treble accidentals", low: "C4", high: "C5", clefs: ["treble"], accidentals: ["", "#", "b"], target: 12 },
-  { name: "Level 7", description: "Bass accidentals", low: "C2", high: "C4", clefs: ["bass"], accidentals: ["", "#", "b"], target: 12 },
-  { name: "Level 8", description: "Alto clef", low: "C3", high: "C5", clefs: ["alto"], accidentals: [""], target: 10 },
-  { name: "Level 9", description: "Tenor clef", low: "C2", high: "C5", clefs: ["tenor"], accidentals: [""], target: 10 },
-  { name: "Level 10", description: "Clef master", low: "C2", high: "C6", clefs: ["treble", "alto", "tenor", "bass"], accidentals: ["", "#", "b"], target: 15 }
-];
-
 const state = {
   current: null,
   clef: "treble",
   levelIndex: 0,
   levelMode: true,
-  levelProgress: Array(10).fill(0),
-  completedLevels: new Set(),
+  customLowPitch: null,
+  customHighPitch: null,
+  levelProgressByPreset: new Map(),
+  completedLevelsByPreset: new Map(),
   mode: "all",
   answered: false,
   score: 0,
@@ -159,6 +148,8 @@ const defaultLowNote = "C3";
 const defaultHighNote = "C5";
 const notes = buildNotes(rangeMinNote, rangeMaxNote);
 const rangeOptions = buildRangeOptions(rangeMinNote, rangeMaxNote);
+state.customLowPitch = pitchValue(defaultLowNote);
+state.customHighPitch = pitchValue(defaultHighNote);
 
 function parseNote(id) {
   const [, letter, accidental = "", octaveText] = id.match(/^([A-G])([#b]?)(\d)$/);
@@ -253,6 +244,89 @@ function clampPitch(id) {
   return Math.min(Math.max(pitchValue(id), min), max);
 }
 
+function activeInstrument() {
+  return instrumentRanges[activeInstrumentIndex];
+}
+
+function activePresetKey() {
+  const instrument = activeInstrument();
+  if (instrument.name !== "Custom") return `${instrument.name}-${clefForInstrument(instrument)}`;
+
+  return `Custom-${state.customLowPitch}-${state.customHighPitch}-${state.clef}`;
+}
+
+function activeLevelProgress() {
+  const key = activePresetKey();
+  if (!state.levelProgressByPreset.has(key)) {
+    state.levelProgressByPreset.set(key, Array(10).fill(0));
+  }
+
+  return state.levelProgressByPreset.get(key);
+}
+
+function activeCompletedLevels() {
+  const key = activePresetKey();
+  if (!state.completedLevelsByPreset.has(key)) {
+    state.completedLevelsByPreset.set(key, new Set());
+  }
+
+  return state.completedLevelsByPreset.get(key);
+}
+
+function levelSourceRange() {
+  const instrument = activeInstrument();
+  if (instrument.name === "Custom") {
+    return {
+      name: "Custom",
+      lowPitch: state.customLowPitch,
+      highPitch: state.customHighPitch,
+      clef: state.clef
+    };
+  }
+
+  return {
+    name: instrument.name,
+    lowPitch: clampPitch(instrument.low),
+    highPitch: clampPitch(instrument.high),
+    clef: clefForInstrument(instrument)
+  };
+}
+
+function activeLevels() {
+  const source = levelSourceRange();
+  const lowPitch = Math.min(source.lowPitch, source.highPitch);
+  const highPitch = Math.max(source.lowPitch, source.highPitch);
+  const span = Math.max(1, highPitch - lowPitch);
+  const steps = [
+    { label: "First notes", portion: 0.18, accidentals: [""], target: 6 },
+    { label: "Lower range", portion: 0.28, accidentals: [""], target: 8 },
+    { label: "Middle range", portion: 0.42, accidentals: [""], target: 8 },
+    { label: "Upper range", portion: 0.60, accidentals: [""], target: 10 },
+    { label: "Full naturals", portion: 1, accidentals: [""], target: 10 },
+    { label: "First accidentals", portion: 0.35, accidentals: ["", "#", "b"], target: 10 },
+    { label: "Lower accidentals", portion: 0.50, accidentals: ["", "#", "b"], target: 12 },
+    { label: "Middle accidentals", portion: 0.70, accidentals: ["", "#", "b"], target: 12 },
+    { label: "Full accidentals", portion: 1, accidentals: ["", "#", "b"], target: 14 },
+    { label: "Master challenge", portion: 1, accidentals: ["", "#", "b"], target: 15 }
+  ];
+
+  return steps.map((step, index) => {
+    const levelHighPitch = index === steps.length - 1
+      ? highPitch
+      : Math.min(highPitch, Math.round(lowPitch + span * step.portion));
+
+    return {
+      name: `Level ${index + 1}`,
+      description: `${source.name}: ${step.label}`,
+      lowPitch,
+      highPitch: Math.max(lowPitch, levelHighPitch),
+      clefs: [source.clef],
+      accidentals: step.accidentals,
+      target: step.target
+    };
+  });
+}
+
 function frequencyFor(id) {
   const semitonesFromA4 = pitchValue(id) - pitchValue("A4");
   return 440 * 2 ** (semitonesFromA4 / 12);
@@ -268,9 +342,9 @@ function noteY(note) {
 function rangeNotes() {
   const low = Number(lowSelect.value);
   const high = Number(highSelect.value);
+  const level = activeLevels()[state.levelIndex];
   return notes.filter((note) => {
     const inRange = note.pitch >= low && note.pitch <= high;
-    const level = levels[state.levelIndex];
     const allowedAccidental = !state.levelMode || level.accidentals.includes(note.accidental);
     return inRange && allowedAccidental;
   });
@@ -286,7 +360,7 @@ function activePool() {
 
 function chooseNext() {
   if (state.levelMode) {
-    const level = levels[state.levelIndex];
+    const level = activeLevels()[state.levelIndex];
     if (level.clefs.length > 1) {
       setClef(level.clefs[Math.floor(Math.random() * level.clefs.length)]);
     }
@@ -409,7 +483,7 @@ function checkAnswer(label) {
     state.correct += 1;
     const completedLevel = updateLevelProgress();
     promptEl.textContent = completedLevel
-      ? `${levels[state.levelIndex].name} complete.`
+      ? `${activeLevels()[state.levelIndex].name} complete.`
       : `${state.current.octaveDisplayLabel} is correct.`;
   } else {
     state.streak = 0;
@@ -455,20 +529,22 @@ function renderReview() {
 }
 
 function renderLevels() {
+  const levels = activeLevels();
   const level = levels[state.levelIndex];
-  const progress = state.levelProgress[state.levelIndex];
+  const progress = activeLevelProgress()[state.levelIndex];
+  const completedLevels = activeCompletedLevels();
   const percent = Math.min(100, Math.round((progress / level.target) * 100));
 
   levelTitle.textContent = state.levelMode ? `${level.name} of 10` : "Free practice";
   levelDescription.textContent = state.levelMode ? level.description : "Choose a level to start a challenge";
   levelProgressBar.style.width = state.levelMode ? `${percent}%` : "0%";
   levelProgressText.textContent = state.levelMode
-    ? (state.completedLevels.has(state.levelIndex) ? "Level complete" : `${progress}/${level.target} correct`)
+    ? (completedLevels.has(state.levelIndex) ? "Level complete" : `${progress}/${level.target} correct`)
     : "No level progress";
 
   levelButtons.innerHTML = levels.map((item, index) => {
     const isActive = state.levelMode && index === state.levelIndex;
-    const isComplete = state.completedLevels.has(index);
+    const isComplete = completedLevels.has(index);
     return `
       <button type="button" class="${isActive ? "active" : ""} ${isComplete ? "complete" : ""}" data-level-index="${index}" title="${item.description}">
         ${index + 1}
@@ -480,12 +556,14 @@ function renderLevels() {
 function updateLevelProgress() {
   if (!state.levelMode) return false;
 
-  const level = levels[state.levelIndex];
-  const wasComplete = state.completedLevels.has(state.levelIndex);
-  state.levelProgress[state.levelIndex] = Math.min(level.target, state.levelProgress[state.levelIndex] + 1);
+  const level = activeLevels()[state.levelIndex];
+  const progress = activeLevelProgress();
+  const completedLevels = activeCompletedLevels();
+  const wasComplete = completedLevels.has(state.levelIndex);
+  progress[state.levelIndex] = Math.min(level.target, progress[state.levelIndex] + 1);
 
-  if (state.levelProgress[state.levelIndex] >= level.target) {
-    state.completedLevels.add(state.levelIndex);
+  if (progress[state.levelIndex] >= level.target) {
+    completedLevels.add(state.levelIndex);
     return !wasComplete;
   }
 
@@ -493,12 +571,11 @@ function updateLevelProgress() {
 }
 
 function applyLevel(index) {
-  const level = levels[index];
+  const level = activeLevels()[index];
   state.levelIndex = index;
   state.levelMode = true;
-  setActiveInstrument(0);
-  lowSelect.value = String(clampPitch(level.low));
-  highSelect.value = String(clampPitch(level.high));
+  lowSelect.value = String(level.lowPitch);
+  highSelect.value = String(level.highPitch);
   setClef(level.clefs[0]);
   renderLevels();
   chooseNext();
@@ -618,6 +695,8 @@ document.querySelector("#reset-session").addEventListener("click", () => {
       lowSelect.value = highSelect.value;
       highSelect.value = swap;
     }
+    state.customLowPitch = Number(lowSelect.value);
+    state.customHighPitch = Number(highSelect.value);
     renderLevels();
     chooseNext();
   });
@@ -629,15 +708,11 @@ instrumentPresets.addEventListener("click", (event) => {
 
   const index = Number(button.dataset.instrumentIndex);
   const instrument = instrumentRanges[index];
-  state.levelMode = false;
   setActiveInstrument(index);
-  if (instrument.name === "Custom") return;
-
-  lowSelect.value = String(clampPitch(instrument.low));
-  highSelect.value = String(clampPitch(instrument.high));
-  setClef(clefForInstrument(instrument));
-  renderLevels();
-  chooseNext();
+  if (instrument.name !== "Custom") {
+    setClef(clefForInstrument(instrument));
+  }
+  applyLevel(0);
 });
 
 levelButtons.addEventListener("click", (event) => {
