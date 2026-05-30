@@ -610,25 +610,6 @@ function applyLevel(index) {
   chooseNext();
 }
 
-function playCurrentNote() {
-  const AudioContext = window.AudioContext || window.webkitAudioContext;
-  if (!AudioContext || !state.current) return;
-
-  const context = new AudioContext();
-  const oscillator = context.createOscillator();
-  const gain = context.createGain();
-
-  oscillator.type = "sine";
-  oscillator.frequency.value = state.current.frequency;
-  gain.gain.setValueAtTime(0.001, context.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.25, context.currentTime + 0.02);
-  gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.8);
-  oscillator.connect(gain);
-  gain.connect(context.destination);
-  oscillator.start();
-  oscillator.stop(context.currentTime + 0.82);
-}
-
 function populateRangeControls() {
   renderInstrumentPresets();
 
@@ -716,7 +697,6 @@ document.querySelector("#next-note").addEventListener("click", chooseNext);
 document.querySelector("#show-answer").addEventListener("click", () => {
   if (!state.answered) checkAnswer("");
 });
-document.querySelector("#hear-note").addEventListener("click", playCurrentNote);
 noteHelpersButton.addEventListener("click", toggleNoteHelpers);
 settingsToggle.addEventListener("click", () => setSettingsOpen(true));
 settingsClose.addEventListener("click", () => setSettingsOpen(false));
