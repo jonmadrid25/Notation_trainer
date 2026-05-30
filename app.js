@@ -15,6 +15,7 @@ const lowSelect = document.querySelector("#low-note");
 const highSelect = document.querySelector("#high-note");
 const bassPresetTenorToggle = document.querySelector("#bass-instruments-tenor-clef");
 const reviewList = document.querySelector("#review-list");
+const noteHelpersButton = document.querySelector("#note-helpers");
 const settingsToggle = document.querySelector("#settings-toggle");
 const settingsClose = document.querySelector("#settings-close");
 const settingsPanel = document.querySelector("#settings-panel");
@@ -91,6 +92,7 @@ const state = {
   levelProgressByPreset: new Map(),
   completedLevelsByPreset: new Map(),
   mode: "all",
+  showHelpers: false,
   answered: false,
   score: 0,
   streak: 0,
@@ -163,6 +165,10 @@ function parseNote(id) {
 function noteValue(id) {
   const note = parseNote(id);
   return note.octave * 7 + noteLetters.indexOf(note.letter);
+}
+
+function noteLetterForValue(value) {
+  return noteLetters[((value % noteLetters.length) + noteLetters.length) % noteLetters.length];
 }
 
 function pitchValue(id) {
@@ -386,6 +392,7 @@ function renderStaff() {
   const clef = clefs[state.clef];
   const ledgerLines = ledgerYPositions(y);
   const bottomLineY = topLineY + lineGap * 4;
+  const helperLabels = state.showHelpers ? staffHelperLabels() : "";
   const viewTop = Math.min(0, y - 70);
   const viewBottom = Math.max(310, bottomLineY + 70, y + 70);
   const accidental = state.current.accidental
@@ -403,9 +410,27 @@ function renderStaff() {
     ${ledgerLines.map((lineY) => `
       <line x1="${noteX - 34}" y1="${lineY}" x2="${noteX + 34}" y2="${lineY}" stroke="#18212f" stroke-width="2"></line>
     `).join("")}
+    ${helperLabels}
     ${accidental}
     <ellipse cx="${noteX}" cy="${y}" rx="${noteRx}" ry="${noteRy}" transform="rotate(${noteTilt} ${noteX} ${y})" fill="#18212f"></ellipse>
   `;
+}
+
+function staffHelperLabels() {
+  const { topLineY, lineGap } = staffGeometry;
+  const bottomLineValue = noteValue(clefs[state.clef].bottomLineNote);
+  const lineLabels = [0, 1, 2, 3, 4].map((line) => {
+    const y = topLineY + line * lineGap;
+    const value = bottomLineValue + (4 - line) * 2;
+    return `<text class="staff-helper-label line-helper" x="132" y="${y + 5}" text-anchor="middle">${noteLetterForValue(value)}</text>`;
+  }).join("");
+  const spaceLabels = [0, 1, 2, 3].map((space) => {
+    const y = topLineY + lineGap / 2 + space * lineGap;
+    const value = bottomLineValue + 7 - space * 2;
+    return `<text class="staff-helper-label space-helper" x="658" y="${y + 5}" text-anchor="middle">${noteLetterForValue(value)}</text>`;
+  }).join("");
+
+  return `${lineLabels}${spaceLabels}`;
 }
 
 function ledgerYPositions(y) {
@@ -675,6 +700,13 @@ function setSettingsOpen(open) {
   settingsBackdrop.hidden = !open;
 }
 
+function toggleNoteHelpers() {
+  state.showHelpers = !state.showHelpers;
+  noteHelpersButton.classList.toggle("active", state.showHelpers);
+  noteHelpersButton.setAttribute("aria-pressed", String(state.showHelpers));
+  renderStaff();
+}
+
 answers.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-answer]");
   if (button) checkAnswer(button.dataset.answer);
@@ -685,6 +717,7 @@ document.querySelector("#show-answer").addEventListener("click", () => {
   if (!state.answered) checkAnswer("");
 });
 document.querySelector("#hear-note").addEventListener("click", playCurrentNote);
+noteHelpersButton.addEventListener("click", toggleNoteHelpers);
 settingsToggle.addEventListener("click", () => setSettingsOpen(true));
 settingsClose.addEventListener("click", () => setSettingsOpen(false));
 settingsBackdrop.addEventListener("click", () => setSettingsOpen(false));
