@@ -35,11 +35,59 @@ select {
 }
 
 .app-shell {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr;
   width: min(1380px, calc(100vw - 24px));
   height: calc(100vh - 24px);
   margin: 12px auto;
+}
+
+.welcome-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  border: 1px solid rgba(216, 222, 232, 0.9);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(15, 118, 110, 0.12), transparent 42%),
+    linear-gradient(315deg, rgba(194, 65, 12, 0.12), transparent 40%),
+    rgba(255, 253, 250, 0.98);
+  box-shadow: var(--shadow);
+}
+
+body.welcome-dismissed .welcome-screen {
+  display: none;
+}
+
+.welcome-content {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  max-width: 560px;
+  text-align: center;
+}
+
+.welcome-content h1 {
+  font-size: clamp(3rem, 7vw, 6rem);
+}
+
+.welcome-content p:not(.eyebrow) {
+  max-width: 440px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.1rem;
+  font-weight: 750;
+}
+
+.welcome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
 }
 
 .practice-pane,

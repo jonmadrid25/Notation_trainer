@@ -11,6 +11,8 @@ const levelProgressBar = document.querySelector("#level-progress-bar");
 const levelProgressText = document.querySelector("#level-progress-text");
 const levelButtons = document.querySelector("#level-buttons");
 const instrumentPresets = document.querySelector("#instrument-presets");
+const welcomePresets = document.querySelector("#welcome-presets");
+const welcomeStart = document.querySelector("#welcome-start");
 const lowSelect = document.querySelector("#low-note");
 const highSelect = document.querySelector("#high-note");
 const bassPresetTenorToggle = document.querySelector("#bass-instruments-tenor-clef");
@@ -681,6 +683,10 @@ function setSettingsOpen(open) {
   settingsBackdrop.hidden = !open;
 }
 
+function dismissWelcome() {
+  document.body.classList.add("welcome-dismissed");
+}
+
 function toggleNoteHelpers() {
   state.showHelpers = !state.showHelpers;
   noteHelpersButton.classList.toggle("active", state.showHelpers);
@@ -701,6 +707,11 @@ noteHelpersButton.addEventListener("click", toggleNoteHelpers);
 settingsToggle.addEventListener("click", () => setSettingsOpen(true));
 settingsClose.addEventListener("click", () => setSettingsOpen(false));
 settingsBackdrop.addEventListener("click", () => setSettingsOpen(false));
+welcomePresets.addEventListener("click", () => {
+  dismissWelcome();
+  setSettingsOpen(true);
+});
+welcomeStart.addEventListener("click", dismissWelcome);
 document.querySelector("#reset-session").addEventListener("click", () => {
   state.score = 0;
   state.streak = 0;
@@ -735,6 +746,7 @@ instrumentPresets.addEventListener("click", (event) => {
 
   const index = Number(button.dataset.instrumentIndex);
   const instrument = instrumentRanges[index];
+  dismissWelcome();
   setActiveInstrument(index);
   if (instrument.name !== "Custom") {
     setClef(clefForInstrument(instrument));
