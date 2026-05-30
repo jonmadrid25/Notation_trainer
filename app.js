@@ -394,7 +394,7 @@ function renderStaff() {
   const clef = clefs[state.clef];
   const ledgerLines = ledgerYPositions(y);
   const bottomLineY = topLineY + lineGap * 4;
-  const helperLabels = state.showHelpers ? staffHelperLabels() : "";
+  const helperLabels = state.showHelpers ? staffHelperLabels(ledgerLines) : "";
   const viewTop = Math.min(0, y - 70);
   const viewBottom = Math.max(310, bottomLineY + 70, y + 70);
   const accidental = state.current.accidental
@@ -418,9 +418,10 @@ function renderStaff() {
   `;
 }
 
-function staffHelperLabels() {
-  const { topLineY, lineGap } = staffGeometry;
+function staffHelperLabels(ledgerLines) {
+  const { topLineY, lineGap, noteX } = staffGeometry;
   const bottomLineValue = noteValue(clefs[state.clef].bottomLineNote);
+  const bottomLineY = topLineY + lineGap * 4;
   const lineLabels = [0, 1, 2, 3, 4].map((line) => {
     const y = topLineY + line * lineGap;
     const value = bottomLineValue + (4 - line) * 2;
@@ -431,8 +432,12 @@ function staffHelperLabels() {
     const value = bottomLineValue + 7 - space * 2;
     return `<text class="staff-helper-label space-helper" x="658" y="${y + 5}" text-anchor="middle">${noteLetterForValue(value)}</text>`;
   }).join("");
+  const ledgerLabels = ledgerLines.map((lineY) => {
+    const value = bottomLineValue + ((bottomLineY - lineY) / lineGap) * 2;
+    return `<text class="staff-helper-label ledger-helper" x="${noteX + 58}" y="${lineY + 5}" text-anchor="middle">${noteLetterForValue(value)}</text>`;
+  }).join("");
 
-  return `${lineLabels}${spaceLabels}`;
+  return `${lineLabels}${spaceLabels}${ledgerLabels}`;
 }
 
 function ledgerYPositions(y) {

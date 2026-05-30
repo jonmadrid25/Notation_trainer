@@ -402,6 +402,10 @@ button.secondary:hover {
   fill: var(--warm);
 }
 
+.ledger-helper {
+  fill: var(--helper-blue);
+}
+
 .answer-row button {
   min-height: 50px;
   padding-inline: 6px;
