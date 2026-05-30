@@ -8,6 +8,7 @@
   --accent: #0f766e;
   --accent-strong: #115e59;
   --warm: #c2410c;
+  --helper-blue: #2563eb;
   --good: #17803d;
   --bad: #b42318;
   --shadow: 0 18px 45px rgba(23, 32, 46, 0.12);
@@ -221,20 +222,33 @@ h2 {
 }
 
 .menu-button {
-  display: grid;
-  align-content: center;
-  gap: 5px;
-  width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: auto;
   min-height: 44px;
-  padding: 0 11px;
+  padding: 0 12px;
   background: var(--warm);
 }
 
-.menu-button span {
+.menu-lines {
+  display: grid;
+  gap: 4px;
+  width: 18px;
+}
+
+.menu-lines span {
   display: block;
   height: 3px;
   border-radius: 999px;
   background: #ffffff;
+}
+
+.menu-label {
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 900;
 }
 
 .menu-button:hover {
@@ -371,7 +385,7 @@ button.secondary:hover {
 .helper-button:hover,
 .helper-button.active {
   color: #ffffff;
-  background: var(--warm);
+  background: var(--helper-blue);
 }
 
 .staff-helper-label {
