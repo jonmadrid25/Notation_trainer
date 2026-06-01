@@ -306,12 +306,37 @@ function levelSourceRange() {
 
 function activeLevels() {
   const source = levelSourceRange();
+
+  const bbMajorScale = ["Bb3", "C4", "D4", "Eb4", "F4", "G4", "A4", "Bb4"];
+
+  const bbLevels = [
+    {
+      name: "Level 1",
+      description: "Bb Major Scale: Bb, C, D, Eb",
+      lowPitch: pitchValue("Bb3"),
+      highPitch: pitchValue("Eb4"),
+      clefs: [source.clef],
+      accidentals: ["", "b"],
+      target: 8,
+      allowedNoteIds: ["Bb3", "C4", "D4", "Eb4"]
+    },
+    {
+      name: "Level 2",
+      description: "Bb Major Scale: Bb, C, D, Eb, F, G, A, Bb",
+      lowPitch: pitchValue("Bb3"),
+      highPitch: pitchValue("Bb4"),
+      clefs: [source.clef],
+      accidentals: ["", "b"],
+      target: 12,
+      allowedNoteIds: bbMajorScale
+    }
+  ];
+
   const lowPitch = Math.min(source.lowPitch, source.highPitch);
   const highPitch = Math.max(source.lowPitch, source.highPitch);
   const span = Math.max(1, highPitch - lowPitch);
+
   const steps = [
-    { label: "First notes", portion: 0.18, accidentals: [""], target: 6 },
-    { label: "Lower range", portion: 0.28, accidentals: [""], target: 8 },
     { label: "Middle range", portion: 0.42, accidentals: [""], target: 8 },
     { label: "Upper range", portion: 0.60, accidentals: [""], target: 10 },
     { label: "Full naturals", portion: 1, accidentals: [""], target: 10 },
@@ -322,13 +347,14 @@ function activeLevels() {
     { label: "Master challenge", portion: 1, accidentals: ["", "#", "b"], target: 15 }
   ];
 
-  return steps.map((step, index) => {
+  const remainingLevels = steps.map((step, index) => {
+    const levelNumber = index + 3;
     const levelHighPitch = index === steps.length - 1
       ? highPitch
       : Math.min(highPitch, Math.round(lowPitch + span * step.portion));
 
     return {
-      name: `Level ${index + 1}`,
+      name: `Level ${levelNumber}`,
       description: `${source.name}: ${step.label}`,
       lowPitch,
       highPitch: Math.max(lowPitch, levelHighPitch),
@@ -336,6 +362,22 @@ function activeLevels() {
       accidentals: step.accidentals,
       target: step.target
     };
+  });
+
+  return [...bbLevels, ...remainingLevels];
+}
+
+function rangeNotes() {
+  const low = Number(lowSelect.value);
+  const high = Number(highSelect.value);
+  const level = activeLevels()[state.levelIndex];
+
+  return notes.filter((note) => {
+    const inRange = note.pitch >= low && note.pitch <= high;
+    const allowedAccidental = !state.levelMode || level.accidentals.includes(note.accidental);
+    const allowedNote = !state.levelMode || !level.allowedNoteIds || level.allowedNoteIds.includes(note.id);
+
+    return inRange && allowedAccidental && allowedNote;
   });
 }
 
