@@ -12,10 +12,20 @@
         <div class="welcome-content">
           <p class="eyebrow">Welcome</p>
           <h1 id="welcome-title">Notation Trainer</h1>
-          <p>Open the menu, choose your instrument preset, then start practicing.</p>
-          <div class="welcome-actions">
-            <button id="welcome-presets" type="button">Choose Preset</button>
-            <button id="welcome-start" class="secondary" type="button">Start With Custom</button>
+          <p id="welcome-copy">Choose what you want to practice.</p>
+          <div id="practice-choice" class="practice-choice" aria-label="Choose practice type">
+            <button id="practice-note-names" type="button" class="practice-choice-button">
+              <span>Practice Note Names</span>
+              <small>Use the full preset or manual range.</small>
+            </button>
+            <button id="practice-scales" type="button" class="practice-choice-button">
+              <span>Practice Scales</span>
+              <small>Choose an instrument scale path.</small>
+            </button>
+          </div>
+          <div id="scale-presets" class="scale-launcher" aria-label="Choose an instrument scale" hidden></div>
+          <div id="welcome-actions" class="welcome-actions" hidden>
+            <button id="welcome-back" class="secondary" type="button">Back</button>
           </div>
         </div>
       </section>
@@ -27,6 +37,7 @@
             <p class="eyebrow">Music note review</p>
           </div>
           <div class="topbar-actions">
+            <button id="home-button" class="secondary home-button" type="button">Home</button>
             <div class="score-strip" aria-label="Session stats">
               <div>
                 <span id="score">0</span>
@@ -51,6 +62,17 @@
             </button>
           </div>
         </header>
+
+        <div id="scale-toolbar" class="scale-toolbar" hidden>
+          <div>
+            <strong id="scale-toolbar-instrument">Instrument</strong>
+            <span>Scale practice</span>
+          </div>
+          <label for="scale-instrument-select">Instrument</label>
+          <select id="scale-instrument-select"></select>
+          <label for="scale-select">Scale</label>
+          <select id="scale-select"></select>
+        </div>
 
         <div class="practice-grid">
           <div class="staff-wrap">

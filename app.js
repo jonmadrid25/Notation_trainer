@@ -6,8 +6,18 @@ const scoreEl = document.querySelector("#score");
 const streakEl = document.querySelector("#streak");
 const accuracyEl = document.querySelector("#accuracy");
 const instrumentPresets = document.querySelector("#instrument-presets");
-const welcomePresets = document.querySelector("#welcome-presets");
-const welcomeStart = document.querySelector("#welcome-start");
+const practiceChoice = document.querySelector("#practice-choice");
+const practiceNoteNames = document.querySelector("#practice-note-names");
+const practiceScales = document.querySelector("#practice-scales");
+const welcomeActions = document.querySelector("#welcome-actions");
+const welcomeBack = document.querySelector("#welcome-back");
+const welcomeCopy = document.querySelector("#welcome-copy");
+const scalePresets = document.querySelector("#scale-presets");
+const scaleToolbar = document.querySelector("#scale-toolbar");
+const scaleToolbarInstrument = document.querySelector("#scale-toolbar-instrument");
+const scaleInstrumentSelect = document.querySelector("#scale-instrument-select");
+const scaleSelect = document.querySelector("#scale-select");
+const homeButton = document.querySelector("#home-button");
 const lowSelect = document.querySelector("#low-note");
 const highSelect = document.querySelector("#high-note");
 const bassPresetTenorToggle = document.querySelector("#bass-instruments-tenor-clef");
@@ -79,11 +89,83 @@ const instrumentRanges = [
 
 const instrumentFamilyOrder = ["Custom", "Brass", "Woodwind", "Strings", "Percussion"];
 
+const scaleDefinitions = [
+  {
+    id: "bb-major",
+    label: "Bb Major",
+    noteIds: (octave) => [`Bb${octave}`, `C${octave + 1}`, `D${octave + 1}`, `Eb${octave + 1}`, `F${octave + 1}`, `G${octave + 1}`, `A${octave + 1}`, `Bb${octave + 1}`]
+  },
+  {
+    id: "b-major",
+    label: "B Major",
+    noteIds: (octave) => [`B${octave}`, `C#${octave + 1}`, `D#${octave + 1}`, `E${octave + 1}`, `F#${octave + 1}`, `G#${octave + 1}`, `A#${octave + 1}`, `B${octave + 1}`]
+  },
+  {
+    id: "c-major",
+    label: "C Major",
+    noteIds: (octave) => [`C${octave}`, `D${octave}`, `E${octave}`, `F${octave}`, `G${octave}`, `A${octave}`, `B${octave}`, `C${octave + 1}`]
+  },
+  {
+    id: "db-major",
+    label: "Db Major",
+    noteIds: (octave) => [`Db${octave}`, `Eb${octave}`, `F${octave}`, `Gb${octave}`, `Ab${octave}`, `Bb${octave}`, `C${octave + 1}`, `Db${octave + 1}`]
+  },
+  {
+    id: "d-major",
+    label: "D Major",
+    noteIds: (octave) => [`D${octave}`, `E${octave}`, `F#${octave}`, `G${octave}`, `A${octave}`, `B${octave}`, `C#${octave + 1}`, `D${octave + 1}`]
+  },
+  {
+    id: "eb-major",
+    label: "Eb Major",
+    noteIds: (octave) => [`Eb${octave}`, `F${octave}`, `G${octave}`, `Ab${octave}`, `Bb${octave}`, `C${octave + 1}`, `D${octave + 1}`, `Eb${octave + 1}`]
+  },
+  {
+    id: "e-major",
+    label: "E Major",
+    noteIds: (octave) => [`E${octave}`, `F#${octave}`, `G#${octave}`, `A${octave}`, `B${octave}`, `C#${octave + 1}`, `D#${octave + 1}`, `E${octave + 1}`]
+  },
+  {
+    id: "f-major",
+    label: "F Major",
+    noteIds: (octave) => [`F${octave}`, `G${octave}`, `A${octave}`, `Bb${octave}`, `C${octave + 1}`, `D${octave + 1}`, `E${octave + 1}`, `F${octave + 1}`]
+  },
+  {
+    id: "gb-major",
+    label: "Gb Major",
+    noteIds: (octave) => [`Gb${octave}`, `Ab${octave}`, `Bb${octave}`, `Cb${octave + 1}`, `Db${octave + 1}`, `Eb${octave + 1}`, `F${octave + 1}`, `Gb${octave + 1}`]
+  },
+  {
+    id: "g-major",
+    label: "G Major",
+    noteIds: (octave) => [`G${octave}`, `A${octave}`, `B${octave}`, `C${octave + 1}`, `D${octave + 1}`, `E${octave + 1}`, `F#${octave + 1}`, `G${octave + 1}`]
+  },
+  {
+    id: "ab-major",
+    label: "Ab Major",
+    noteIds: (octave) => [`Ab${octave}`, `Bb${octave}`, `C${octave + 1}`, `Db${octave + 1}`, `Eb${octave + 1}`, `F${octave + 1}`, `G${octave + 1}`, `Ab${octave + 1}`]
+  },
+  {
+    id: "a-major",
+    label: "A Major",
+    noteIds: (octave) => [`A${octave}`, `B${octave}`, `C#${octave + 1}`, `D${octave + 1}`, `E${octave + 1}`, `F#${octave + 1}`, `G#${octave + 1}`, `A${octave + 1}`]
+  },
+  {
+    id: "bb-chromatic",
+    label: "Bb Chromatic",
+    noteIds: (octave) => [`Bb${octave}`, `B${octave}`, `C${octave + 1}`, `Db${octave + 1}`, `D${octave + 1}`, `Eb${octave + 1}`, `E${octave + 1}`, `F${octave + 1}`, `Gb${octave + 1}`, `G${octave + 1}`, `Ab${octave + 1}`, `A${octave + 1}`, `Bb${octave + 1}`]
+  }
+];
+
 const state = {
   current: null,
   clef: "treble",
   customLowPitch: null,
   customHighPitch: null,
+  scaleName: null,
+  scaleNoteIds: null,
+  scaleInstrumentIndex: null,
+  currentScaleId: "bb-major",
   mode: "all",
   showHelpers: false,
   answered: false,
@@ -256,6 +338,7 @@ function rangeNotes() {
   const high = Number(highSelect.value);
 
   return notes.filter((note) => {
+    if (state.scaleNoteIds && !state.scaleNoteIds.includes(note.id)) return false;
     return note.pitch >= low && note.pitch <= high;
   });
 }
@@ -282,11 +365,21 @@ function activePool() {
 
 function chooseNext() {
   const pool = activePool();
+  if (!pool.length) {
+    state.current = null;
+    promptEl.textContent = "Choose a range with available notes.";
+    staff.innerHTML = "";
+    answers.innerHTML = "";
+    return;
+  }
+
   const previous = state.current?.id;
   const candidates = pool.length > 1 ? pool.filter((note) => note.id !== previous) : pool;
   state.current = candidates[Math.floor(Math.random() * candidates.length)];
   state.answered = false;
-  promptEl.textContent = `Name this ${clefs[state.clef].name.toLowerCase()} clef note.`;
+  promptEl.textContent = state.scaleName
+    ? `${state.scaleName}: name this ${clefs[state.clef].name.toLowerCase()} clef note.`
+    : `Name this ${clefs[state.clef].name.toLowerCase()} clef note.`;
   renderStaff();
   renderAnswers();
 }
@@ -464,6 +557,7 @@ function renderReview() {
 }
 
 function populateRangeControls() {
+  renderScalePresets();
   renderInstrumentPresets();
 
   const options = rangeOptions.map((note) => `<option value="${note.value}">${note.label}</option>`).join("");
@@ -471,6 +565,64 @@ function populateRangeControls() {
   highSelect.innerHTML = options;
   lowSelect.value = pitchValue(defaultLowNote);
   highSelect.value = pitchValue(defaultHighNote);
+}
+
+function scaleForInstrument(instrument, definition) {
+  const low = pitchValue(instrument.low);
+  const high = pitchValue(instrument.high);
+  const preferredOctave = instrument.name === "Bassoon" || instrument.clef === "bass" ? 2 : 3;
+  const octaveCandidates = [preferredOctave, preferredOctave + 1, preferredOctave - 1, preferredOctave + 2, preferredOctave - 2, 1, 2, 3, 4, 5, 6];
+  const uniqueOctaves = [...new Set(octaveCandidates)].filter((octave) => octave >= 1 && octave <= 7);
+
+  for (const octave of uniqueOctaves) {
+    const noteIds = definition.noteIds(octave);
+    const scaleLow = pitchValue(noteIds[0]);
+    const scaleHigh = pitchValue(noteIds[noteIds.length - 1]);
+    if (scaleLow >= low && scaleHigh <= high) {
+      return {
+        id: definition.id,
+        label: definition.label,
+        low: noteIds[0],
+        high: noteIds[noteIds.length - 1],
+        noteIds
+      };
+    }
+  }
+
+  return null;
+}
+
+function availableScalesForInstrument(instrument) {
+  return scaleDefinitions
+    .map((definition) => scaleForInstrument(instrument, definition))
+    .filter(Boolean);
+}
+
+function renderScalePresets() {
+  scalePresets.innerHTML = scaleInstrumentOptions().map(({ instrument, index }) => `
+    <button type="button" class="scale-launch-button" data-scale-instrument-index="${index}">
+      <span>${instrument.name}</span>
+      <small>${clefs[clefForInstrument(instrument)].name} clef</small>
+    </button>
+  `).join("");
+}
+
+function scaleInstrumentOptions() {
+  return instrumentRanges
+    .map((instrument, index) => ({ instrument, index, scales: availableScalesForInstrument(instrument) }))
+    .filter((item) => item.instrument.name !== "Custom" && item.scales.length);
+}
+
+function renderScaleInstrumentMenu() {
+  scaleInstrumentSelect.innerHTML = scaleInstrumentOptions().map(({ instrument, index }) => `
+    <option value="${index}">${instrument.name}</option>
+  `).join("");
+}
+
+function renderScaleMenu(scales) {
+  scaleSelect.innerHTML = scales.map((scale) => `
+    <option value="${scale.id}">${scale.label} (${formatNoteName(scale.low)}-${formatNoteName(scale.high)})</option>
+  `).join("");
 }
 
 function renderInstrumentPresets() {
@@ -514,6 +666,11 @@ function setActiveInstrument(index) {
 function applyInstrument(index) {
   const instrument = instrumentRanges[index];
   setActiveInstrument(index);
+  state.scaleName = null;
+  state.scaleNoteIds = null;
+  state.scaleInstrumentIndex = null;
+  scaleToolbar.hidden = true;
+  document.body.classList.remove("scale-practice");
 
   if (instrument.name === "Custom") {
     lowSelect.value = String(state.customLowPitch);
@@ -524,6 +681,31 @@ function applyInstrument(index) {
     setClef(clefForInstrument(instrument));
   }
 
+  chooseNext();
+}
+
+function applyScalePreset(index, requestedScaleId = state.currentScaleId) {
+  const instrument = instrumentRanges[index];
+  const scales = availableScalesForInstrument(instrument);
+  const scale = scales.find((item) => item.id === requestedScaleId) || scales[0];
+  if (!scale) return;
+
+  setActiveInstrument(index);
+  setClef(clefForInstrument(instrument));
+  state.scaleInstrumentIndex = index;
+  state.currentScaleId = scale.id;
+  state.scaleName = `${instrument.name} ${scale.label}`;
+  state.scaleNoteIds = scale.noteIds;
+  scaleToolbar.hidden = false;
+  document.body.classList.add("scale-practice");
+  scaleToolbarInstrument.textContent = instrument.name;
+  renderScaleInstrumentMenu();
+  scaleInstrumentSelect.value = String(index);
+  renderScaleMenu(scales);
+  scaleSelect.value = scale.id;
+  lowSelect.value = String(pitchValue(scale.low));
+  highSelect.value = String(pitchValue(scale.high));
+  dismissWelcome();
   chooseNext();
 }
 
@@ -549,6 +731,31 @@ function setSettingsOpen(open) {
   settingsBackdrop.hidden = !open;
 }
 
+function showWelcomeChoice() {
+  welcomeCopy.textContent = "Choose what you want to practice.";
+  practiceChoice.hidden = false;
+  scalePresets.hidden = true;
+  welcomeActions.hidden = true;
+}
+
+function returnHome() {
+  state.scaleName = null;
+  state.scaleNoteIds = null;
+  state.scaleInstrumentIndex = null;
+  scaleToolbar.hidden = true;
+  setSettingsOpen(false);
+  document.body.classList.remove("scale-practice");
+  document.body.classList.remove("welcome-dismissed");
+  showWelcomeChoice();
+}
+
+function showScaleChoice() {
+  welcomeCopy.textContent = "Choose an instrument, then pick a scale on the practice page.";
+  practiceChoice.hidden = true;
+  scalePresets.hidden = false;
+  welcomeActions.hidden = false;
+}
+
 function dismissWelcome() {
   document.body.classList.add("welcome-dismissed");
 }
@@ -570,14 +777,20 @@ document.querySelector("#show-answer").addEventListener("click", () => {
   if (!state.answered) checkAnswer("");
 });
 noteHelpersButton.addEventListener("click", toggleNoteHelpers);
+homeButton.addEventListener("click", returnHome);
 settingsToggle.addEventListener("click", () => setSettingsOpen(true));
 settingsClose.addEventListener("click", () => setSettingsOpen(false));
 settingsBackdrop.addEventListener("click", () => setSettingsOpen(false));
-welcomePresets.addEventListener("click", () => {
+practiceNoteNames.addEventListener("click", () => {
+  state.scaleName = null;
+  state.scaleNoteIds = null;
+  state.scaleInstrumentIndex = null;
+  scaleToolbar.hidden = true;
+  document.body.classList.remove("scale-practice");
   dismissWelcome();
-  setSettingsOpen(true);
 });
-welcomeStart.addEventListener("click", dismissWelcome);
+practiceScales.addEventListener("click", showScaleChoice);
+welcomeBack.addEventListener("click", showWelcomeChoice);
 document.querySelector("#reset-session").addEventListener("click", () => {
   state.score = 0;
   state.streak = 0;
@@ -593,6 +806,11 @@ document.querySelector("#reset-session").addEventListener("click", () => {
 [lowSelect, highSelect].forEach((select) => {
   select.addEventListener("change", () => {
     setActiveInstrument(0);
+    state.scaleName = null;
+    state.scaleNoteIds = null;
+    state.scaleInstrumentIndex = null;
+    scaleToolbar.hidden = true;
+    document.body.classList.remove("scale-practice");
     if (Number(lowSelect.value) > Number(highSelect.value)) {
       const swap = lowSelect.value;
       lowSelect.value = highSelect.value;
@@ -602,6 +820,22 @@ document.querySelector("#reset-session").addEventListener("click", () => {
     state.customHighPitch = Number(highSelect.value);
     chooseNext();
   });
+});
+
+scaleSelect.addEventListener("change", () => {
+  if (state.scaleInstrumentIndex === null) return;
+  applyScalePreset(state.scaleInstrumentIndex, scaleSelect.value);
+});
+
+scaleInstrumentSelect.addEventListener("change", () => {
+  applyScalePreset(Number(scaleInstrumentSelect.value), scaleSelect.value);
+});
+
+scalePresets.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-scale-instrument-index]");
+  if (!button) return;
+
+  applyScalePreset(Number(button.dataset.scaleInstrumentIndex));
 });
 
 instrumentPresets.addEventListener("click", (event) => {
@@ -652,6 +886,7 @@ document.addEventListener("keydown", (event) => {
 });
 
 populateRangeControls();
+showWelcomeChoice();
 renderStats();
 renderReview();
 applyInstrument(0);

@@ -71,7 +71,8 @@ body.welcome-dismissed .welcome-screen {
   display: grid;
   justify-items: center;
   gap: 16px;
-  max-width: 560px;
+  width: min(940px, 100%);
+  max-width: 940px;
   text-align: center;
 }
 
@@ -92,6 +93,79 @@ body.welcome-dismissed .welcome-screen {
   flex-wrap: wrap;
   justify-content: center;
   gap: 10px;
+}
+
+.practice-choice {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  width: min(680px, 100%);
+}
+
+.practice-choice-button {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  min-height: 120px;
+  padding: 18px;
+  text-align: left;
+}
+
+.practice-choice-button span {
+  font-size: 1.1rem;
+}
+
+.practice-choice-button small {
+  margin-top: 6px;
+  color: inherit;
+  font-size: 0.82rem;
+  opacity: 0.84;
+}
+
+.scale-launcher {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  max-height: min(46vh, 360px);
+  overflow: auto;
+  padding: 4px;
+}
+
+.scale-launcher[hidden],
+.welcome-actions[hidden],
+.practice-choice[hidden] {
+  display: none;
+}
+
+.scale-launch-button {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  min-height: 68px;
+  padding: 10px 12px;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  background: #ffffff;
+  text-align: left;
+}
+
+.scale-launch-button:hover {
+  color: #ffffff;
+}
+
+.scale-launch-button span {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.88rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scale-launch-button small {
+  color: inherit;
+  font-size: 0.72rem;
+  opacity: 0.78;
 }
 
 .practice-pane,
@@ -167,6 +241,41 @@ body.settings-open .review-pane {
   display: flex;
   align-items: start;
   gap: 10px;
+}
+
+.scale-toolbar {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) auto minmax(160px, 240px) auto minmax(220px, 320px);
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.scale-toolbar[hidden] {
+  display: none;
+}
+
+.scale-toolbar div {
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+}
+
+.scale-toolbar strong {
+  font-size: 0.92rem;
+}
+
+.scale-toolbar span {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.scale-toolbar label {
+  justify-self: end;
 }
 
 .eyebrow {
@@ -256,6 +365,15 @@ h2 {
 
 .menu-button:hover {
   background: #1d4ed8;
+}
+
+.home-button {
+  min-height: 44px;
+  padding: 0 14px;
+}
+
+body.scale-practice .menu-button {
+  display: none;
 }
 
 .practice-grid {
@@ -627,6 +745,15 @@ select {
     flex-direction: column;
   }
 
+  .scale-toolbar {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .scale-toolbar label {
+    justify-self: start;
+  }
+
   .score-strip {
     width: 100%;
     min-width: 0;
@@ -634,6 +761,15 @@ select {
 
   .practice-pane {
     padding: 18px;
+  }
+
+  .scale-launcher {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: 42vh;
+  }
+
+  .practice-choice {
+    grid-template-columns: 1fr;
   }
 
   .practice-grid {
@@ -665,6 +801,10 @@ select {
 
   .answer-row-buttons {
     grid-template-columns: repeat(4, 1fr);
+  }
+
+  .scale-launcher {
+    grid-template-columns: 1fr;
   }
 
   .score-strip {
