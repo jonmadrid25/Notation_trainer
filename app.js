@@ -270,7 +270,7 @@ function activePresetKey() {
 function activeLevelProgress() {
   const key = activePresetKey();
   if (!state.levelProgressByPreset.has(key)) {
-    state.levelProgressByPreset.set(key, Array(10).fill(0));
+    state.levelProgressByPreset.set(key, Array(activeLevels().length).fill(0));
   }
 
   return state.levelProgressByPreset.get(key);
@@ -306,65 +306,58 @@ function levelSourceRange() {
 
 function activeLevels() {
   const source = levelSourceRange();
+  const bbOctave = source.name === "Bassoon" ? 2 : 3;
 
-  const bbMajorScale = ["Bb3", "C4", "D4", "Eb4", "F4", "G4", "A4", "Bb4"];
+  const bbMajorFirstFive = [`Bb${bbOctave}`, `C${bbOctave + 1}`, `D${bbOctave + 1}`, `Eb${bbOctave + 1}`, `F${bbOctave + 1}`];
+  const bbMajorScale = [...bbMajorFirstFive, `G${bbOctave + 1}`, `A${bbOctave + 1}`, `Bb${bbOctave + 1}`];
+  const bbChromaticScale = [
+    `Bb${bbOctave}`,
+    `B${bbOctave}`,
+    `C${bbOctave + 1}`,
+    `Db${bbOctave + 1}`,
+    `D${bbOctave + 1}`,
+    `Eb${bbOctave + 1}`,
+    `E${bbOctave + 1}`,
+    `F${bbOctave + 1}`,
+    `Gb${bbOctave + 1}`,
+    `G${bbOctave + 1}`,
+    `Ab${bbOctave + 1}`,
+    `A${bbOctave + 1}`,
+    `Bb${bbOctave + 1}`
+  ];
 
-  const bbLevels = [
+  return [
     {
       name: "Level 1",
-      description: "Bb Major Scale: Bb, C, D, Eb",
-      lowPitch: pitchValue("Bb3"),
-      highPitch: pitchValue("Eb4"),
+      description: "Bb Major Scale: Bb, C, D, Eb, F",
+      lowPitch: pitchValue(bbMajorFirstFive[0]),
+      highPitch: pitchValue(bbMajorFirstFive[bbMajorFirstFive.length - 1]),
       clefs: [source.clef],
       accidentals: ["", "b"],
       target: 8,
-      allowedNoteIds: ["Bb3", "C4", "D4", "Eb4"]
+      allowedNoteIds: bbMajorFirstFive
     },
     {
       name: "Level 2",
       description: "Bb Major Scale: Bb, C, D, Eb, F, G, A, Bb",
-      lowPitch: pitchValue("Bb3"),
-      highPitch: pitchValue("Bb4"),
+      lowPitch: pitchValue(bbMajorScale[0]),
+      highPitch: pitchValue(bbMajorScale[bbMajorScale.length - 1]),
       clefs: [source.clef],
       accidentals: ["", "b"],
       target: 12,
       allowedNoteIds: bbMajorScale
+    },
+    {
+      name: "Level 3",
+      description: "Bb Chromatic Scale: one octave",
+      lowPitch: pitchValue(bbChromaticScale[0]),
+      highPitch: pitchValue(bbChromaticScale[bbChromaticScale.length - 1]),
+      clefs: [source.clef],
+      accidentals: ["", "b"],
+      target: 16,
+      allowedNoteIds: bbChromaticScale
     }
   ];
-
-  const lowPitch = Math.min(source.lowPitch, source.highPitch);
-  const highPitch = Math.max(source.lowPitch, source.highPitch);
-  const span = Math.max(1, highPitch - lowPitch);
-
-  const steps = [
-    { label: "Middle range", portion: 0.42, accidentals: [""], target: 8 },
-    { label: "Upper range", portion: 0.60, accidentals: [""], target: 10 },
-    { label: "Full naturals", portion: 1, accidentals: [""], target: 10 },
-    { label: "First accidentals", portion: 0.35, accidentals: ["", "#", "b"], target: 10 },
-    { label: "Lower accidentals", portion: 0.50, accidentals: ["", "#", "b"], target: 12 },
-    { label: "Middle accidentals", portion: 0.70, accidentals: ["", "#", "b"], target: 12 },
-    { label: "Full accidentals", portion: 1, accidentals: ["", "#", "b"], target: 14 },
-    { label: "Master challenge", portion: 1, accidentals: ["", "#", "b"], target: 15 }
-  ];
-
-  const remainingLevels = steps.map((step, index) => {
-    const levelNumber = index + 3;
-    const levelHighPitch = index === steps.length - 1
-      ? highPitch
-      : Math.min(highPitch, Math.round(lowPitch + span * step.portion));
-
-    return {
-      name: `Level ${levelNumber}`,
-      description: `${source.name}: ${step.label}`,
-      lowPitch,
-      highPitch: Math.max(lowPitch, levelHighPitch),
-      clefs: [source.clef],
-      accidentals: step.accidentals,
-      target: step.target
-    };
-  });
-
-  return [...bbLevels, ...remainingLevels];
 }
 
 function rangeNotes() {
@@ -391,17 +384,6 @@ function noteY(note) {
   const halfStep = staffGeometry.lineGap / 2;
   const bottomLineValue = noteValue(clefs[state.clef].bottomLineNote);
   return bottomLineY - (note.value - bottomLineValue) * halfStep;
-}
-
-function rangeNotes() {
-  const low = Number(lowSelect.value);
-  const high = Number(highSelect.value);
-  const level = activeLevels()[state.levelIndex];
-  return notes.filter((note) => {
-    const inRange = note.pitch >= low && note.pitch <= high;
-    const allowedAccidental = !state.levelMode || level.accidentals.includes(note.accidental);
-    return inRange && allowedAccidental;
-  });
 }
 
 function activePool() {
@@ -613,7 +595,7 @@ function renderLevels() {
   const completedLevels = activeCompletedLevels();
   const percent = Math.min(100, Math.round((progress / level.target) * 100));
 
-  levelTitle.textContent = state.levelMode ? `${level.name} of 10` : "Free practice";
+  levelTitle.textContent = state.levelMode ? `${level.name} of ${levels.length}` : "Free practice";
   levelDescription.textContent = state.levelMode ? level.description : "Choose a level to start a challenge";
   levelProgressBar.style.width = state.levelMode ? `${percent}%` : "0%";
   levelProgressText.textContent = state.levelMode
