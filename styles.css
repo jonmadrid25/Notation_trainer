@@ -245,7 +245,7 @@ body.settings-open .review-pane {
 
 .scale-toolbar {
   display: grid;
-  grid-template-columns: minmax(150px, 1fr) auto minmax(160px, 240px) auto minmax(220px, 320px);
+  grid-template-columns: minmax(130px, 1fr) auto minmax(150px, 220px) auto minmax(100px, 140px) auto minmax(200px, 300px);
   align-items: center;
   gap: 10px;
   padding: 10px 12px;

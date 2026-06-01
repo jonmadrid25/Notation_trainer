@@ -16,6 +16,8 @@ const scalePresets = document.querySelector("#scale-presets");
 const scaleToolbar = document.querySelector("#scale-toolbar");
 const scaleToolbarInstrument = document.querySelector("#scale-toolbar-instrument");
 const scaleInstrumentSelect = document.querySelector("#scale-instrument-select");
+const scaleClefLabel = document.querySelector("#scale-clef-label");
+const scaleClefSelect = document.querySelector("#scale-clef-select");
 const scaleSelect = document.querySelector("#scale-select");
 const homeButton = document.querySelector("#home-button");
 const lowSelect = document.querySelector("#low-note");
@@ -60,7 +62,7 @@ const instrumentRanges = [
   { name: "Custom", low: "C3", high: "C5", clef: "treble", family: "Custom" },
   { name: "Bass Clarinet", low: "C3", high: "G6", clef: "treble", family: "Woodwind" },
   { name: "Bassoon", low: "Bb1", high: "Eb5", clef: "bass", family: "Woodwind" },
-  { name: "Cello", low: "C2", high: "C6", clef: "tenor", family: "Strings" },
+  { name: "Cello", low: "C2", high: "C6", clef: "bass", family: "Strings" },
   { name: "Chimes", low: "C4", high: "F5", clef: "treble", family: "Percussion" },
   { name: "Clarinet", low: "E3", high: "C7", clef: "treble", family: "Woodwind" },
   { name: "Contrabassoon", low: "Bb1", high: "Bb4", clef: "bass", family: "Woodwind" },
@@ -165,6 +167,7 @@ const state = {
   scaleName: null,
   scaleNoteIds: null,
   scaleInstrumentIndex: null,
+  scaleClef: null,
   currentScaleId: "bb-major",
   mode: "all",
   showHelpers: false,
@@ -602,7 +605,7 @@ function renderScalePresets() {
   scalePresets.innerHTML = scaleInstrumentOptions().map(({ instrument, index }) => `
     <button type="button" class="scale-launch-button" data-scale-instrument-index="${index}">
       <span>${instrument.name}</span>
-      <small>${clefs[clefForInstrument(instrument)].name} clef</small>
+      <small>${clefs[instrument.clef].name} clef</small>
     </button>
   `).join("");
 }
@@ -617,6 +620,26 @@ function renderScaleInstrumentMenu() {
   scaleInstrumentSelect.innerHTML = scaleInstrumentOptions().map(({ instrument, index }) => `
     <option value="${index}">${instrument.name}</option>
   `).join("");
+}
+
+function renderScaleClefMenu(instrument) {
+  const bassClefInstrument = instrument.clef === "bass";
+  scaleClefLabel.hidden = !bassClefInstrument;
+  scaleClefSelect.hidden = !bassClefInstrument;
+
+  if (!bassClefInstrument) {
+    scaleClefSelect.innerHTML = "";
+    return instrument.clef;
+  }
+
+  scaleClefSelect.innerHTML = `
+    <option value="bass">Bass</option>
+    <option value="tenor">Tenor</option>
+  `;
+
+  const selectedClef = ["bass", "tenor"].includes(state.scaleClef) ? state.scaleClef : "bass";
+  scaleClefSelect.value = selectedClef;
+  return selectedClef;
 }
 
 function renderScaleMenu(scales) {
@@ -669,6 +692,7 @@ function applyInstrument(index) {
   state.scaleName = null;
   state.scaleNoteIds = null;
   state.scaleInstrumentIndex = null;
+  state.scaleClef = null;
   scaleToolbar.hidden = true;
   document.body.classList.remove("scale-practice");
 
@@ -691,7 +715,6 @@ function applyScalePreset(index, requestedScaleId = state.currentScaleId) {
   if (!scale) return;
 
   setActiveInstrument(index);
-  setClef(clefForInstrument(instrument));
   state.scaleInstrumentIndex = index;
   state.currentScaleId = scale.id;
   state.scaleName = `${instrument.name} ${scale.label}`;
@@ -701,6 +724,8 @@ function applyScalePreset(index, requestedScaleId = state.currentScaleId) {
   scaleToolbarInstrument.textContent = instrument.name;
   renderScaleInstrumentMenu();
   scaleInstrumentSelect.value = String(index);
+  state.scaleClef = renderScaleClefMenu(instrument);
+  setClef(state.scaleClef);
   renderScaleMenu(scales);
   scaleSelect.value = scale.id;
   lowSelect.value = String(pitchValue(scale.low));
@@ -742,6 +767,7 @@ function returnHome() {
   state.scaleName = null;
   state.scaleNoteIds = null;
   state.scaleInstrumentIndex = null;
+  state.scaleClef = null;
   scaleToolbar.hidden = true;
   setSettingsOpen(false);
   document.body.classList.remove("scale-practice");
@@ -785,6 +811,7 @@ practiceNoteNames.addEventListener("click", () => {
   state.scaleName = null;
   state.scaleNoteIds = null;
   state.scaleInstrumentIndex = null;
+  state.scaleClef = null;
   scaleToolbar.hidden = true;
   document.body.classList.remove("scale-practice");
   dismissWelcome();
@@ -809,6 +836,7 @@ document.querySelector("#reset-session").addEventListener("click", () => {
     state.scaleName = null;
     state.scaleNoteIds = null;
     state.scaleInstrumentIndex = null;
+    state.scaleClef = null;
     scaleToolbar.hidden = true;
     document.body.classList.remove("scale-practice");
     if (Number(lowSelect.value) > Number(highSelect.value)) {
@@ -828,7 +856,14 @@ scaleSelect.addEventListener("change", () => {
 });
 
 scaleInstrumentSelect.addEventListener("change", () => {
+  state.scaleClef = null;
   applyScalePreset(Number(scaleInstrumentSelect.value), scaleSelect.value);
+});
+
+scaleClefSelect.addEventListener("change", () => {
+  state.scaleClef = scaleClefSelect.value;
+  setClef(state.scaleClef);
+  chooseNext();
 });
 
 scalePresets.addEventListener("click", (event) => {
