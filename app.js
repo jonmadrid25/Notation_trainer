@@ -9,6 +9,7 @@ const instrumentPresets = document.querySelector("#instrument-presets");
 const practiceChoice = document.querySelector("#practice-choice");
 const practiceNoteNames = document.querySelector("#practice-note-names");
 const practiceScales = document.querySelector("#practice-scales");
+const practiceKeySignatures = document.querySelector("#practice-key-signatures");
 const welcomeActions = document.querySelector("#welcome-actions");
 const welcomeBack = document.querySelector("#welcome-back");
 const welcomeCopy = document.querySelector("#welcome-copy");
@@ -19,12 +20,17 @@ const scaleInstrumentSelect = document.querySelector("#scale-instrument-select")
 const scaleClefLabel = document.querySelector("#scale-clef-label");
 const scaleClefSelect = document.querySelector("#scale-clef-select");
 const scaleSelect = document.querySelector("#scale-select");
+const keySignatureToolbar = document.querySelector("#key-signature-toolbar");
+const keySignatureClefSelect = document.querySelector("#key-signature-clef-select");
 const homeButton = document.querySelector("#home-button");
+const autoNextToggle = document.querySelector("#auto-next");
 const lowSelect = document.querySelector("#low-note");
 const highSelect = document.querySelector("#high-note");
 const bassPresetTenorToggle = document.querySelector("#bass-instruments-tenor-clef");
 const reviewList = document.querySelector("#review-list");
 const noteHelpersButton = document.querySelector("#note-helpers");
+const nextNoteButton = document.querySelector("#next-note");
+const showAnswerButton = document.querySelector("#show-answer");
 const settingsToggle = document.querySelector("#settings-toggle");
 const settingsClose = document.querySelector("#settings-close");
 const settingsPanel = document.querySelector("#settings-panel");
@@ -159,8 +165,44 @@ const scaleDefinitions = [
   }
 ];
 
+const keySignatureDefinitions = [
+  { label: "C Major", accidental: "", count: 0 },
+  { label: "G Major", accidental: "#", count: 1 },
+  { label: "D Major", accidental: "#", count: 2 },
+  { label: "A Major", accidental: "#", count: 3 },
+  { label: "E Major", accidental: "#", count: 4 },
+  { label: "B Major", accidental: "#", count: 5 },
+  { label: "Gb Major", accidental: "b", count: 6 },
+  { label: "Db Major", accidental: "b", count: 5 },
+  { label: "Ab Major", accidental: "b", count: 4 },
+  { label: "Eb Major", accidental: "b", count: 3 },
+  { label: "Bb Major", accidental: "b", count: 2 },
+  { label: "F Major", accidental: "b", count: 1 }
+];
+
+const keySignatureAccidentalNotes = {
+  treble: {
+    "#": ["F5", "C5", "G5", "D5", "A4", "E5", "B4"],
+    b: ["B4", "E5", "A4", "D5", "G4", "C5", "F4"]
+  },
+  bass: {
+    "#": ["F3", "C3", "G3", "D3", "A2", "E3", "B2"],
+    b: ["B2", "E3", "A2", "D3", "G2", "C3", "F2"]
+  },
+  alto: {
+    "#": ["F4", "C4", "G4", "D4", "A3", "E4", "B3"],
+    b: ["B3", "E4", "A3", "D4", "G3", "C4", "F3"]
+  },
+  tenor: {
+    "#": ["F4", "C4", "G4", "D4", "A3", "E4", "B3"],
+    b: ["B3", "E4", "A3", "D4", "G3", "C4", "F3"]
+  }
+};
+
 const state = {
   current: null,
+  keySignature: null,
+  practiceMode: "notes",
   clef: "treble",
   customLowPitch: null,
   customHighPitch: null,
@@ -171,6 +213,7 @@ const state = {
   currentScaleId: "bb-major",
   mode: "all",
   showHelpers: false,
+  autoNext: false,
   answered: false,
   score: 0,
   streak: 0,
@@ -181,6 +224,7 @@ const state = {
 };
 
 let activeInstrumentIndex = 0;
+let autoNextTimer = null;
 
 const staffGeometry = {
   topLineY: 100,
@@ -366,7 +410,30 @@ function activePool() {
   return missed.length ? missed : ranged;
 }
 
+function cancelAutoNext() {
+  if (!autoNextTimer) return;
+  window.clearTimeout(autoNextTimer);
+  autoNextTimer = null;
+}
+
+function scheduleAutoNext() {
+  cancelAutoNext();
+  if (!state.autoNext) return;
+
+  autoNextTimer = window.setTimeout(() => {
+    autoNextTimer = null;
+    chooseNext();
+  }, 1400);
+}
+
 function chooseNext() {
+  cancelAutoNext();
+
+  if (state.practiceMode === "key-signatures") {
+    chooseNextKeySignature();
+    return;
+  }
+
   const pool = activePool();
   if (!pool.length) {
     state.current = null;
@@ -385,6 +452,43 @@ function chooseNext() {
     : `Name this ${clefs[state.clef].name.toLowerCase()} clef note.`;
   renderStaff();
   renderAnswers();
+}
+
+function chooseNextKeySignature() {
+  const previous = state.keySignature?.label;
+  const candidates = keySignatureDefinitions.length > 1
+    ? keySignatureDefinitions.filter((item) => item.label !== previous)
+    : keySignatureDefinitions;
+  state.keySignature = candidates[Math.floor(Math.random() * candidates.length)];
+  state.answered = false;
+  promptEl.textContent = `Name this ${clefs[state.clef].name.toLowerCase()} clef key signature.`;
+  renderKeySignatureStaff();
+  renderKeySignatureAnswers();
+}
+
+function renderKeySignatureStaff() {
+  const { topLineY, lineGap } = staffGeometry;
+  const clef = clefs[state.clef];
+  const viewTop = 0;
+  const viewBottom = 310;
+  const accidental = state.keySignature.accidental;
+  const notesForClef = accidental ? keySignatureAccidentalNotes[state.clef][accidental] : [];
+  const signatureMarks = notesForClef.slice(0, state.keySignature.count).map((noteId, index) => {
+    const y = noteY({ value: noteValue(noteId) });
+    const x = 250 + index * 34;
+    return `<text x="${x}" y="${y}" font-size="52" dominant-baseline="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700" fill="#18212f">${accidentalSymbols[accidental]}</text>`;
+  }).join("");
+
+  staff.setAttribute("viewBox", `0 ${viewTop} 720 ${viewBottom - viewTop}`);
+  staff.innerHTML = `
+    <rect x="0" y="${viewTop}" width="720" height="${viewBottom - viewTop}" rx="0" fill="#fffdfa"></rect>
+    <text x="${clef.symbolX}" y="${clef.symbolY}" font-size="${clef.symbolSize}" font-family="Georgia, 'Times New Roman', serif" fill="#18212f">${clef.symbol}</text>
+    ${[0, 1, 2, 3, 4].map((line) => {
+      const lineY = topLineY + line * lineGap;
+      return `<line x1="150" y1="${lineY}" x2="640" y2="${lineY}" stroke="#18212f" stroke-width="2"></line>`;
+    }).join("")}
+    ${signatureMarks}
+  `;
 }
 
 function renderStaff() {
@@ -500,29 +604,72 @@ function renderAnswers() {
   }).join("");
 }
 
-function answerValue(note) {
-  return note.baseLabel;
+function renderKeySignatureAnswers() {
+  answers.innerHTML = `
+    <section class="key-answer-row" aria-label="Major key answers">
+      ${keySignatureDefinitions.map((key) => (
+        `<button type="button" data-key-answer="${key.label}" aria-label="Answer ${key.label}">${key.label}</button>`
+      )).join("")}
+    </section>
+  `;
 }
 
-function checkAnswer(label) {
+function answerValue(note) {
+  return note.id.replace(/\d$/, "");
+}
+
+function checkKeySignatureAnswer(label) {
   if (state.answered) return;
 
   state.answered = true;
   state.attempts += 1;
-  const expected = answerValue(state.current);
-  const correct = label === expected || state.current.answerLabels.includes(label);
+  const expected = state.keySignature.label;
+  const correct = label === expected;
 
   if (correct) {
     state.score += 10 + Math.min(state.streak, 5);
     state.streak += 1;
     state.correct += 1;
-    promptEl.textContent = `${state.current.octaveDisplayLabel} is correct.`;
+    promptEl.textContent = `${expected} is correct.`;
+  } else {
+    state.streak = 0;
+    promptEl.textContent = `That key signature is ${expected}.`;
+  }
+
+  [...answers.querySelectorAll("button")].forEach((button) => {
+    const value = button.dataset.keyAnswer;
+    button.classList.toggle("correct", value === expected);
+    button.classList.toggle("incorrect", value === label && !correct);
+  });
+
+  renderStats();
+  scheduleAutoNext();
+}
+
+function checkAnswer(label) {
+  if (state.practiceMode === "key-signatures") {
+    checkKeySignatureAnswer(label);
+    return;
+  }
+
+  if (state.answered) return;
+
+  state.answered = true;
+  state.attempts += 1;
+  const expected = answerValue(state.current);
+  const correct = label === expected;
+
+  if (correct) {
+    state.score += 10 + Math.min(state.streak, 5);
+    state.streak += 1;
+    state.correct += 1;
+    promptEl.textContent = `${formatNoteName(state.current.id)} is correct.`;
   } else {
     state.streak = 0;
     const miss = state.misses.get(state.current.id) || { note: state.current, count: 0 };
     miss.count += 1;
     state.misses.set(state.current.id, miss);
-    promptEl.textContent = `That note is ${state.current.octaveDisplayLabel}.`;
+    promptEl.textContent = `That note is ${formatNoteName(state.current.id)}.`;
   }
 
   state.recent.unshift({ id: state.current.id, correct });
@@ -530,12 +677,13 @@ function checkAnswer(label) {
 
   [...answers.querySelectorAll("button")].forEach((button) => {
     const value = button.dataset.answer;
-    button.classList.toggle("correct", value === expected || state.current.answerLabels.includes(value));
+    button.classList.toggle("correct", value === expected);
     button.classList.toggle("incorrect", value === label && !correct);
   });
 
   renderStats();
   renderReview();
+  scheduleAutoNext();
 }
 
 function renderStats() {
@@ -687,14 +835,19 @@ function setActiveInstrument(index) {
 }
 
 function applyInstrument(index) {
+  cancelAutoNext();
   const instrument = instrumentRanges[index];
   setActiveInstrument(index);
+  state.practiceMode = "notes";
+  state.keySignature = null;
   state.scaleName = null;
   state.scaleNoteIds = null;
   state.scaleInstrumentIndex = null;
   state.scaleClef = null;
   scaleToolbar.hidden = true;
+  keySignatureToolbar.hidden = true;
   document.body.classList.remove("scale-practice");
+  document.body.classList.remove("key-signature-practice");
 
   if (instrument.name === "Custom") {
     lowSelect.value = String(state.customLowPitch);
@@ -705,22 +858,28 @@ function applyInstrument(index) {
     setClef(clefForInstrument(instrument));
   }
 
+  nextNoteButton.textContent = "Next note";
   chooseNext();
 }
 
 function applyScalePreset(index, requestedScaleId = state.currentScaleId) {
+  cancelAutoNext();
   const instrument = instrumentRanges[index];
   const scales = availableScalesForInstrument(instrument);
   const scale = scales.find((item) => item.id === requestedScaleId) || scales[0];
   if (!scale) return;
 
   setActiveInstrument(index);
+  state.practiceMode = "scales";
+  state.keySignature = null;
   state.scaleInstrumentIndex = index;
   state.currentScaleId = scale.id;
   state.scaleName = `${instrument.name} ${scale.label}`;
   state.scaleNoteIds = scale.noteIds;
   scaleToolbar.hidden = false;
+  keySignatureToolbar.hidden = true;
   document.body.classList.add("scale-practice");
+  document.body.classList.remove("key-signature-practice");
   scaleToolbarInstrument.textContent = instrument.name;
   renderScaleInstrumentMenu();
   scaleInstrumentSelect.value = String(index);
@@ -731,6 +890,7 @@ function applyScalePreset(index, requestedScaleId = state.currentScaleId) {
   lowSelect.value = String(pitchValue(scale.low));
   highSelect.value = String(pitchValue(scale.high));
   dismissWelcome();
+  nextNoteButton.textContent = "Next note";
   chooseNext();
 }
 
@@ -764,15 +924,40 @@ function showWelcomeChoice() {
 }
 
 function returnHome() {
+  cancelAutoNext();
+  state.practiceMode = "notes";
+  state.keySignature = null;
   state.scaleName = null;
   state.scaleNoteIds = null;
   state.scaleInstrumentIndex = null;
   state.scaleClef = null;
   scaleToolbar.hidden = true;
+  keySignatureToolbar.hidden = true;
   setSettingsOpen(false);
   document.body.classList.remove("scale-practice");
+  document.body.classList.remove("key-signature-practice");
   document.body.classList.remove("welcome-dismissed");
+  nextNoteButton.textContent = "Next note";
   showWelcomeChoice();
+}
+
+function startKeySignaturePractice() {
+  cancelAutoNext();
+  state.practiceMode = "key-signatures";
+  state.keySignature = null;
+  state.scaleName = null;
+  state.scaleNoteIds = null;
+  state.scaleInstrumentIndex = null;
+  state.scaleClef = null;
+  scaleToolbar.hidden = true;
+  keySignatureToolbar.hidden = false;
+  setClef(keySignatureClefSelect.value);
+  setSettingsOpen(false);
+  document.body.classList.remove("scale-practice");
+  document.body.classList.add("key-signature-practice");
+  dismissWelcome();
+  nextNoteButton.textContent = "Next key signature";
+  chooseNext();
 }
 
 function showScaleChoice() {
@@ -794,29 +979,46 @@ function toggleNoteHelpers() {
 }
 
 answers.addEventListener("click", (event) => {
+  const keyButton = event.target.closest("button[data-key-answer]");
+  if (keyButton) {
+    checkKeySignatureAnswer(keyButton.dataset.keyAnswer);
+    return;
+  }
+
   const button = event.target.closest("button[data-answer]");
   if (button) checkAnswer(button.dataset.answer);
 });
 
-document.querySelector("#next-note").addEventListener("click", chooseNext);
-document.querySelector("#show-answer").addEventListener("click", () => {
+nextNoteButton.addEventListener("click", chooseNext);
+showAnswerButton.addEventListener("click", () => {
   if (!state.answered) checkAnswer("");
 });
 noteHelpersButton.addEventListener("click", toggleNoteHelpers);
 homeButton.addEventListener("click", returnHome);
+autoNextToggle.addEventListener("change", () => {
+  state.autoNext = autoNextToggle.checked;
+  if (!state.autoNext) cancelAutoNext();
+});
 settingsToggle.addEventListener("click", () => setSettingsOpen(true));
 settingsClose.addEventListener("click", () => setSettingsOpen(false));
 settingsBackdrop.addEventListener("click", () => setSettingsOpen(false));
 practiceNoteNames.addEventListener("click", () => {
+  cancelAutoNext();
+  state.practiceMode = "notes";
+  state.keySignature = null;
   state.scaleName = null;
   state.scaleNoteIds = null;
   state.scaleInstrumentIndex = null;
   state.scaleClef = null;
   scaleToolbar.hidden = true;
+  keySignatureToolbar.hidden = true;
   document.body.classList.remove("scale-practice");
+  document.body.classList.remove("key-signature-practice");
+  nextNoteButton.textContent = "Next note";
   dismissWelcome();
 });
 practiceScales.addEventListener("click", showScaleChoice);
+practiceKeySignatures.addEventListener("click", startKeySignaturePractice);
 welcomeBack.addEventListener("click", showWelcomeChoice);
 document.querySelector("#reset-session").addEventListener("click", () => {
   state.score = 0;
@@ -832,13 +1034,19 @@ document.querySelector("#reset-session").addEventListener("click", () => {
 
 [lowSelect, highSelect].forEach((select) => {
   select.addEventListener("change", () => {
+    cancelAutoNext();
     setActiveInstrument(0);
+    state.practiceMode = "notes";
+    state.keySignature = null;
     state.scaleName = null;
     state.scaleNoteIds = null;
     state.scaleInstrumentIndex = null;
     state.scaleClef = null;
     scaleToolbar.hidden = true;
+    keySignatureToolbar.hidden = true;
     document.body.classList.remove("scale-practice");
+    document.body.classList.remove("key-signature-practice");
+    nextNoteButton.textContent = "Next note";
     if (Number(lowSelect.value) > Number(highSelect.value)) {
       const swap = lowSelect.value;
       lowSelect.value = highSelect.value;
@@ -852,18 +1060,32 @@ document.querySelector("#reset-session").addEventListener("click", () => {
 
 scaleSelect.addEventListener("change", () => {
   if (state.scaleInstrumentIndex === null) return;
+  cancelAutoNext();
   applyScalePreset(state.scaleInstrumentIndex, scaleSelect.value);
 });
 
 scaleInstrumentSelect.addEventListener("change", () => {
+  cancelAutoNext();
   state.scaleClef = null;
   applyScalePreset(Number(scaleInstrumentSelect.value), scaleSelect.value);
 });
 
 scaleClefSelect.addEventListener("change", () => {
+  cancelAutoNext();
   state.scaleClef = scaleClefSelect.value;
   setClef(state.scaleClef);
   chooseNext();
+});
+
+keySignatureClefSelect.addEventListener("change", () => {
+  cancelAutoNext();
+  setClef(keySignatureClefSelect.value);
+  if (state.practiceMode === "key-signatures") {
+    state.answered = false;
+    promptEl.textContent = `Name this ${clefs[state.clef].name.toLowerCase()} clef key signature.`;
+    renderKeySignatureStaff();
+    renderKeySignatureAnswers();
+  }
 });
 
 scalePresets.addEventListener("click", (event) => {
@@ -883,6 +1105,7 @@ instrumentPresets.addEventListener("click", (event) => {
 });
 
 bassPresetTenorToggle.addEventListener("change", () => {
+  cancelAutoNext();
   renderInstrumentPresets();
   const instrument = instrumentRanges[activeInstrumentIndex];
   if (instrument.clef === "bass") {
@@ -893,6 +1116,7 @@ bassPresetTenorToggle.addEventListener("change", () => {
 
 modeButtons.forEach((button) => {
   button.addEventListener("click", () => {
+    cancelAutoNext();
     modeButtons.forEach((item) => item.classList.remove("active"));
     button.classList.add("active");
     state.mode = button.dataset.mode;
@@ -902,12 +1126,23 @@ modeButtons.forEach((button) => {
 
 clefButtons.forEach((button) => {
   button.addEventListener("click", () => {
+    cancelAutoNext();
     setClef(button.dataset.clef);
     chooseNext();
   });
 });
 
 document.addEventListener("keydown", (event) => {
+  if (state.practiceMode === "key-signatures") {
+    if (event.key === "Enter") {
+      chooseNext();
+    }
+    if (event.key === "Escape") {
+      setSettingsOpen(false);
+    }
+    return;
+  }
+
   const key = event.key.toUpperCase();
   if (noteLetters.includes(key)) {
     checkAnswer(key);

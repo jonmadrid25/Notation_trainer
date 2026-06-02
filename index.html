@@ -22,7 +22,12 @@
               <span>Practice Scales</span>
               <small>Choose an instrument scale path.</small>
             </button>
+            <button id="practice-key-signatures" type="button" class="practice-choice-button">
+              <span>Practice Key Signatures</span>
+              <small>Identify major keys in any clef.</small>
+            </button>
           </div>
+          <p class="welcome-credit">Created in 2026 by ChatGPT, Codex, and Jonathan Madrid.</p>
           <div id="scale-presets" class="scale-launcher" aria-label="Choose an instrument scale" hidden></div>
           <div id="welcome-actions" class="welcome-actions" hidden>
             <button id="welcome-back" class="secondary" type="button">Back</button>
@@ -38,6 +43,10 @@
           </div>
           <div class="topbar-actions">
             <button id="home-button" class="secondary home-button" type="button">Home</button>
+            <label class="auto-next-toggle">
+              <input id="auto-next" type="checkbox">
+              <span>Auto next</span>
+            </label>
             <div class="score-strip" aria-label="Session stats">
               <div>
                 <span id="score">0</span>
@@ -74,6 +83,20 @@
           <select id="scale-clef-select"></select>
           <label for="scale-select">Scale</label>
           <select id="scale-select"></select>
+        </div>
+
+        <div id="key-signature-toolbar" class="key-signature-toolbar" hidden>
+          <div>
+            <strong>Key Signatures</strong>
+            <span>12 major keys</span>
+          </div>
+          <label for="key-signature-clef-select">Clef</label>
+          <select id="key-signature-clef-select">
+            <option value="treble">Treble</option>
+            <option value="bass">Bass</option>
+            <option value="alto">Alto</option>
+            <option value="tenor">Tenor</option>
+          </select>
         </div>
 
         <div class="practice-grid">
