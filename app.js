@@ -84,34 +84,34 @@ const answerGroups = [
 ];
 
 const instrumentRanges = [
-  { name: "Custom", low: "C3", high: "C5", clef: "treble", family: "Custom" },
-  { name: "Bass Clarinet", low: "C3", high: "G6", clef: "treble", family: "Woodwind" },
-  { name: "Bassoon", low: "Bb1", high: "Eb5", clef: "bass", family: "Woodwind" },
-  { name: "Cello", low: "C2", high: "C6", clef: "bass", family: "Strings" },
-  { name: "Chimes", low: "C4", high: "F5", clef: "treble", family: "Percussion" },
-  { name: "Clarinet", low: "E3", high: "C7", clef: "treble", family: "Woodwind" },
-  { name: "Contrabassoon", low: "Bb1", high: "Bb4", clef: "bass", family: "Woodwind" },
-  { name: "Double Bass", low: "C2", high: "C5", clef: "bass", family: "Strings" },
-  { name: "English Horn", low: "B3", high: "G6", clef: "treble", family: "Woodwind" },
-  { name: "Euphonium / Baritone", low: "Bb1", high: "Bb4", clef: "bass", family: "Brass" },
-  { name: "Flute", low: "C4", high: "D7", clef: "treble", family: "Woodwind" },
-  { name: "Glockenspiel (Bells)", low: "G3", high: "C6", clef: "treble", family: "Percussion" },
-  { name: "Guitar", low: "E3", high: "E6", clef: "treble", family: "Strings" },
-  { name: "Harp", low: "C1", high: "F#7", clef: "treble", family: "Strings" },
-  { name: "Horn", low: "F#2", high: "C6", clef: "treble", family: "Brass" },
-  { name: "Marimba", low: "C2", high: "C7", clef: "treble", family: "Percussion" },
-  { name: "Oboe", low: "Bb3", high: "A6", clef: "treble", family: "Woodwind" },
-  { name: "Piano", low: "C1", high: "C8", clef: "treble", family: "Percussion" },
-  { name: "Piccolo", low: "D4", high: "C7", clef: "treble", family: "Woodwind" },
-  { name: "Saxophone", low: "Bb3", high: "G6", clef: "treble", family: "Woodwind" },
-  { name: "Timpani", low: "D2", high: "C4", clef: "bass", family: "Percussion" },
-  { name: "Trombone", low: "E2", high: "F5", clef: "bass", family: "Brass" },
-  { name: "Trumpet", low: "F#3", high: "D6", clef: "treble", family: "Brass" },
-  { name: "Tuba", low: "D1", high: "F4", clef: "bass", family: "Brass" },
-  { name: "Vibraphone", low: "F3", high: "F6", clef: "treble", family: "Percussion" },
-  { name: "Viola", low: "C3", high: "E6", clef: "alto", family: "Strings" },
-  { name: "Violin", low: "G3", high: "A7", clef: "treble", family: "Strings" },
-  { name: "Xylophone", low: "F3", high: "C7", clef: "treble", family: "Percussion" }
+  { name: "Custom", low: "C3", high: "F4", clef: "treble", family: "Custom" },
+  { name: "Bass Clarinet", low: "C3", high: "C6", clef: "treble", family: "Woodwind" },
+  { name: "Bassoon", low: "Bb1", high: "Ab4", clef: "bass", family: "Woodwind" },
+  { name: "Cello", low: "C2", high: "F5", clef: "bass", family: "Strings" },
+  { name: "Chimes", low: "C4", high: "Bb4", clef: "treble", family: "Percussion" },
+  { name: "Clarinet", low: "E3", high: "F6", clef: "treble", family: "Woodwind" },
+  { name: "Contrabassoon", low: "Bb1", high: "Eb4", clef: "bass", family: "Woodwind" },
+  { name: "Double Bass", low: "C2", high: "F4", clef: "bass", family: "Strings" },
+  { name: "English Horn", low: "B3", high: "C6", clef: "treble", family: "Woodwind" },
+  { name: "Euphonium / Baritone", low: "Bb1", high: "Eb4", clef: "bass", family: "Brass" },
+  { name: "Flute", low: "C4", high: "G6", clef: "treble", family: "Woodwind" },
+  { name: "Glockenspiel (Bells)", low: "G3", high: "F5", clef: "treble", family: "Percussion" },
+  { name: "Guitar", low: "E3", high: "A5", clef: "treble", family: "Strings" },
+  { name: "Harp", low: "C1", high: "B6", clef: "treble", family: "Strings" },
+  { name: "Horn", low: "F#2", high: "F5", clef: "treble", family: "Brass" },
+  { name: "Marimba", low: "C2", high: "F6", clef: "treble", family: "Percussion" },
+  { name: "Oboe", low: "Bb3", high: "D6", clef: "treble", family: "Woodwind" },
+  { name: "Piano", low: "C1", high: "F7", clef: "treble", family: "Percussion" },
+  { name: "Piccolo", low: "D4", high: "F6", clef: "treble", family: "Woodwind" },
+  { name: "Saxophone", low: "Bb3", high: "C6", clef: "treble", family: "Woodwind" },
+  { name: "Timpani", low: "D2", high: "F3", clef: "bass", family: "Percussion" },
+  { name: "Trombone", low: "E2", high: "Bb4", clef: "bass", family: "Brass" },
+  { name: "Trumpet", low: "F#3", high: "G5", clef: "treble", family: "Brass" },
+  { name: "Tuba", low: "D1", high: "Bb3", clef: "bass", family: "Brass" },
+  { name: "Vibraphone", low: "F3", high: "Bb5", clef: "treble", family: "Percussion" },
+  { name: "Viola", low: "C3", high: "A5", clef: "alto", family: "Strings" },
+  { name: "Violin", low: "G3", high: "D7", clef: "treble", family: "Strings" },
+  { name: "Xylophone", low: "F3", high: "F6", clef: "treble", family: "Percussion" }
 ];
 
 const instrumentFamilyOrder = ["Custom", "Brass", "Woodwind", "Strings", "Percussion"];
@@ -304,7 +304,7 @@ const clefs = {
 const rangeMinNote = "C1";
 const rangeMaxNote = "C8";
 const defaultLowNote = "C3";
-const defaultHighNote = "C5";
+const defaultHighNote = "F4";
 const notes = buildNotes(rangeMinNote, rangeMaxNote);
 const rangeOptions = buildRangeOptions(rangeMinNote, rangeMaxNote);
 state.customLowPitch = pitchValue(defaultLowNote);
