@@ -98,7 +98,7 @@ body.welcome-dismissed .welcome-screen {
 
 .practice-choice {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   width: min(900px, 100%);
 }
@@ -273,15 +273,27 @@ body.settings-open .review-pane {
   gap: 10px;
 }
 
+.note-name-toolbar,
 .scale-toolbar {
   display: grid;
-  grid-template-columns: minmax(130px, 1fr) auto minmax(150px, 220px) auto minmax(100px, 140px) auto minmax(200px, 300px);
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #ffffff;
+}
+
+.note-name-toolbar {
+  grid-template-columns: minmax(130px, 1fr) auto minmax(140px, 210px) auto minmax(110px, 150px) auto minmax(105px, 145px) auto minmax(105px, 145px) auto minmax(110px, 150px);
+}
+
+body.microphone-practice .note-name-toolbar {
+  grid-template-columns: minmax(120px, 1fr) auto minmax(120px, 170px) auto minmax(82px, 116px) auto minmax(92px, 128px) auto minmax(92px, 128px) auto minmax(90px, 124px) auto minmax(118px, 158px);
+}
+
+.scale-toolbar {
+  grid-template-columns: minmax(120px, 1fr) auto minmax(140px, 200px) auto minmax(90px, 130px) auto minmax(170px, 260px) auto minmax(130px, 180px);
 }
 
 .key-signature-toolbar {
@@ -295,11 +307,15 @@ body.settings-open .review-pane {
   background: #ffffff;
 }
 
+.note-name-toolbar[hidden],
 .scale-toolbar[hidden],
-.key-signature-toolbar[hidden] {
+.key-signature-toolbar[hidden],
+.key-signature-options[hidden],
+.microphone-panel[hidden] {
   display: none;
 }
 
+.note-name-toolbar div,
 .scale-toolbar div,
 .key-signature-toolbar div {
   display: grid;
@@ -307,11 +323,13 @@ body.settings-open .review-pane {
   gap: 2px;
 }
 
+.note-name-toolbar strong,
 .scale-toolbar strong,
 .key-signature-toolbar strong {
   font-size: 0.92rem;
 }
 
+.note-name-toolbar span,
 .scale-toolbar span,
 .key-signature-toolbar span {
   color: var(--muted);
@@ -319,9 +337,37 @@ body.settings-open .review-pane {
   font-weight: 800;
 }
 
+.note-name-toolbar label,
 .scale-toolbar label,
 .key-signature-toolbar label {
   justify-self: end;
+}
+
+.key-signature-options {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 7px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.key-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.key-option input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
 }
 
 .eyebrow {
@@ -439,12 +485,17 @@ h2 {
   accent-color: var(--accent);
 }
 
+body.note-name-practice .menu-button,
 body.scale-practice .menu-button {
   display: none;
 }
 
 body.key-signature-practice .menu-button,
 body.key-signature-practice .helper-button {
+  display: none;
+}
+
+body.microphone-practice #show-answer {
   display: none;
 }
 
@@ -500,6 +551,38 @@ body.key-signature-practice .helper-button {
 .answer-grid {
   display: grid;
   gap: 10px;
+}
+
+.microphone-panel {
+  display: grid;
+  gap: 12px;
+  justify-items: stretch;
+}
+
+.microphone-panel button.active {
+  background: var(--bad);
+}
+
+.microphone-readout {
+  display: grid;
+  gap: 7px;
+  padding: 16px;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.microphone-readout span,
+.microphone-readout small {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.microphone-readout strong {
+  font-size: 2.4rem;
+  line-height: 1;
 }
 
 .answer-row {
@@ -840,12 +923,19 @@ select {
     flex-direction: column;
   }
 
+  .note-name-toolbar,
   .scale-toolbar,
-  .key-signature-toolbar {
+  .key-signature-toolbar,
+  .key-signature-options {
     grid-template-columns: 1fr;
     align-items: stretch;
   }
 
+  body.microphone-practice .note-name-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .note-name-toolbar label,
   .scale-toolbar label,
   .key-signature-toolbar label {
     justify-self: start;
@@ -902,6 +992,10 @@ select {
   }
 
   .key-answer-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .key-signature-options {
     grid-template-columns: repeat(2, 1fr);
   }
 

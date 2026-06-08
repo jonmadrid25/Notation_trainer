@@ -25,6 +25,10 @@
               <span>Practice Key Signatures</span>
               <small>Identify major keys in any clef.</small>
             </button>
+            <button id="practice-microphone" type="button" class="practice-choice-button">
+              <span>Practice With Instrument</span>
+              <small>Play the written note into your microphone.</small>
+            </button>
           </div>
           <p class="welcome-credit">Created in 2026 by ChatGPT, Codex, and Jonathan Madrid.</p>
           <a class="practice-mate-link" href="https://practice-mate.vercel.app/" target="_blank" rel="noopener noreferrer">Practice Mate</a>
@@ -73,6 +77,36 @@
           </div>
         </header>
 
+        <div id="note-name-toolbar" class="note-name-toolbar">
+          <div>
+            <strong id="note-toolbar-title">Note Names</strong>
+            <span id="note-toolbar-subtitle">Full range practice</span>
+          </div>
+          <label for="note-instrument-select">Instrument</label>
+          <select id="note-instrument-select"></select>
+          <label for="note-clef-select">Clef</label>
+          <select id="note-clef-select">
+            <option value="treble">Treble</option>
+            <option value="bass">Bass</option>
+            <option value="alto">Alto</option>
+            <option value="tenor">Tenor</option>
+          </select>
+          <label for="note-low-select">Low</label>
+          <select id="note-low-select"></select>
+          <label for="note-high-select">High</label>
+          <select id="note-high-select"></select>
+          <label for="note-mode-select">Mode</label>
+          <select id="note-mode-select">
+            <option value="all">All notes</option>
+            <option value="missed">Missed</option>
+          </select>
+          <label id="microphone-notation-label" for="microphone-notation-select" hidden>Notation</label>
+          <select id="microphone-notation-select" hidden>
+            <option value="accidentals">Accidentals</option>
+            <option value="key-signature">Key signature</option>
+          </select>
+        </div>
+
         <div id="scale-toolbar" class="scale-toolbar" hidden>
           <div>
             <strong id="scale-toolbar-instrument">Instrument</strong>
@@ -84,6 +118,11 @@
           <select id="scale-clef-select"></select>
           <label for="scale-select">Scale</label>
           <select id="scale-select"></select>
+          <label for="scale-notation-select">Notation</label>
+          <select id="scale-notation-select">
+            <option value="accidentals">Accidentals</option>
+            <option value="key-signature">Key signature</option>
+          </select>
         </div>
 
         <div id="key-signature-toolbar" class="key-signature-toolbar" hidden>
@@ -99,6 +138,8 @@
             <option value="tenor">Tenor</option>
           </select>
         </div>
+        <div id="key-signature-options" class="key-signature-options" hidden></div>
+        <div id="microphone-key-options" class="key-signature-options microphone-key-options" hidden></div>
 
         <div class="practice-grid">
           <div class="staff-wrap">
@@ -115,6 +156,14 @@
             </div>
 
             <div id="answers" class="answer-grid" aria-label="Answer choices"></div>
+            <div id="microphone-panel" class="microphone-panel" hidden>
+              <button id="microphone-toggle" type="button">Start microphone</button>
+              <div class="microphone-readout" aria-live="polite">
+                <span id="microphone-status">Microphone is off.</span>
+                <strong id="detected-note">--</strong>
+                <small id="detected-tuning">Play the written note when ready.</small>
+              </div>
+            </div>
 
             <div class="action-row">
               <button id="show-answer" type="button" class="secondary">Show answer</button>
